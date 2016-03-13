@@ -1,0 +1,431 @@
+//*************************************
+//
+// # Vertical Rhythm
+//
+////
+/// @group Typography - Vertical Rhythm
+////
+//
+// *************************************
+
+
+// -------------------------------------
+// Dependencies
+// -------------------------------------
+
+@if (not mixin-exists(jigsass-mq)) {
+  @error '`jigsass-tools-typography/scss/lib/rhythm` has a dependency ' +
+    'on `jigsass-tools-mq`. Please import it before importing this file.';
+}
+
+@if (not function-exists(jigsass-get-rhythm-unit)) {
+  @error '`jigsass-tools-typography/scss/lib/rhythm` has a dependency ' +
+    'on `jigsass-tools-typography/scss/lib/config`. Please import it ' +
+    'before importing this file.';
+}
+
+@if (not function-exists(jigsass-get-body-font-size)) {
+  @error '`jigsass-tools-typography/scss/lib/rhythm` has a dependency ' +
+    'on `jigsass-tools-typography/scss/lib/config`. Please import it ' +
+    'before importing this file.';
+}
+
+@if (not function-exists(jigsass-get-size)) {
+  @error '`jigsass-tools-typography/scss/lib/rhythm` has a dependency ' +
+    'on `jigsass-tools-typography/scss/lib/config`. Please import it ' +
+    'before importing this file.';
+}
+
+
+
+
+
+// -------------------------------------
+// Constants
+// -------------------------------------
+
+/// The default font size in most (all?) browsers.
+/// ---
+/// @type Number
+/// ---
+$_jigsass-browser-default-font-size: 16px;
+
+
+
+
+
+// -------------------------------------
+//   Functions
+// -------------------------------------
+
+/// Get the number of Typographic lines
+/// required for a given font-size
+/// ---
+/// @param {Number | String | List} $size
+///   When a `Number`: A font-size.
+///
+///   When a `String`: A named size from the `jigsass-sizes` palette.
+///
+///   When a `List`: First item is the base for multiplication (named size or number),
+///   second item is the multiplier, third, optional, item is the ratio.
+///   If there are only two items in the `name` list, ratio
+///   will resolve to the value of `$jigsass-default-ratio`.
+/// @param {Number | String | List} $rhythm [jigsass-get-rhythm-unit()]
+///   The length of a single typographic line.
+///
+///   When a `Number`: A length.
+///
+///   When a `String`: A named size from the `jigsass-sizes` palette.
+///
+///   When a `List`: First item is the base for multiplication (named size or number),
+///   second item is the multiplier, third, optional, item is the ratio.
+///   If there are only two items in the `name` list, ratio
+///   will resolve to the value of `$jigsass-default-ratio`.
+/// ---
+/// @returns {Number}
+/// ---
+@function jigsass-lines-for-size($size, $rhythm: jigsass-get-rhythm-unit()) {
+  $font-size: jigsass-get-size($size, $unit: px);
+  $rhythm: jigsass-get-size($rhythm, $unit: px);
+  $lines: ceil($font-size / $rhythm);
+
+  // Check if lines are too crampped.
+  $needs-extra-padding: $lines * $rhythm - $font-size < (jigsass-get-min-line-padding() * 2);
+
+  @return if($needs-extra-padding, $lines + 1, $lines);
+}
+
+
+/// Get the length of x typographic lines.
+/// ---
+/// @param {Number} $lines
+///   The number of Typographic lines to get the length of.
+/// @param {Number | String | List} $context [jigsass-get-body-font-size()]
+///   When converting to or from relative units, the absolute length (in px)
+///   which is the basis of conversion (e.g. for $lengths in em units,
+///   would normally be the font-size of the current element).
+/// @param {String} $unit
+///   The unit to convert to.
+/// ---
+/// @return {Number}
+/// ---
+@function jigsass-rhythm(
+  $lines,
+  $context: jigsass-get-body-font-size(),
+  $unit: $jigsass-default-unit
+) {
+  $context: jigsass-get-size($context, $unit: px);
+  $rhythm: jigsass-convert-length($lines * jigsass-get-rhythm-unit(), $unit, $context);
+
+  @return if(unit($rhythm) == px, floor($rhythm), $rhythm);
+}
+
+
+
+
+
+// -------------------------------------
+//   Mixins
+// -------------------------------------
+
+// ----- Establish baseline ----- //
+/// Establish a responsive typographic baseline.
+///
+/// Sets a font-size in percentage, which is a fourth of the
+/// basic line-height on the `html` element in every breakpoint
+/// defined in `$jigsass-sizes.rhythm-unit`.
+///
+/// Additionally sets a line-height of `4rem` on the `body` element,
+/// and a font-size in each breakpoint defined in `$jigsass-get-body-font-size`;
+/// ---
+@mixin jigsass-set-baseline() {
+  @at-root html {
+    $bps: map-get(_jigsass-merge-sizes(), rhythm-unit);
+    @each $bp, $value in $bps {
+      @include jigsass-mq($bp) {
+        font-size: jigsass-get-rhythm-unit() / $_jigsass-browser-default-font-size * 100%;
+      }
+    }
+  }
+  @at-root body {
+    $bps: map-get(_jigsass-merge-sizes(), body);
+    @each $bp, $value in $bps {
+      @include jigsass-mq($bp) {
+        font-size: jigsass-convert-length(
+          jigsass-get-body-font-size(),
+          em,
+          jigsass-get-rhythm-unit()
+        );
+      }
+    }
+
+    @if ($jigsass-rem-px-fallback) {
+      @if (not global-variable-exists(jigsass-mq-static-breakpoint)) {
+        @error 'Generating pixel fallback to rem values depends on the ' +
+          '`$jigsass-mq-static-breakpoint` variable from `jigsass-tools-mq`. ' +
+          'Please import it before trying to generate pixel fallbacks.';
+      }
+
+      // Cache the active breakpoint.
+      $_was-active-bp: $jigsass-mq-active-breakpoint;
+
+      // Set the active breakpoint to the static one
+      $jigsass-mq-active-breakpoint: $jigsass-mq-static-breakpoint !global;
+
+      line-height: jigsass-convert-length(4rem, px);
+
+      // Restore the active breakpoint.
+      $jigsass-mq-active-breakpoint: $_was-active-bp !global;
+
+    }
+    line-height: 4rem;
+  }
+}
+
+// ----- Set font Size ----- //
+/// Set font-size and line-height properties based on
+/// size and vertical rhythm configurations.
+/// ---
+/// @param {String | Number | List} $size
+///   When a `String`: A named-size from the `$jigsass-sizes` palette.
+///
+///   When a `Number`: A length to be converted into the unit defined in `$unit`.
+///
+///   When a `List`: First item is the base for multiplication,
+///   second item is the multiplier, third, optional, item is the ratio.
+///   If there are only two items in the `name` list, ratio
+///   will resolve to the value of `$jigsass-default-ratio`.
+/// @param {Number | Boolean} $lines [false]
+///   Override the default number of typographic lines occupied by the element.
+/// @param {Number | Boolean} $context [false]
+///   When converting to or from relative units, the absolute length (in px)
+///   which is the basis of conversion (e.g. for $lengths in em units, would
+///   normally be the font-size of the current element).
+/// @param {String} $unit [$jigsass-default-unit]
+///   The output unit to convert `$size` to.
+/// ---
+@mixin jigsass-font-size(
+  $size,
+  $bps: false,
+  $lines: false,
+  $context: false,
+  $unit: $jigsass-default-unit
+) {
+  @if ($bps and mixin-exists(jigsass-mq)) {
+    @if ($bps == all) {
+      $rhythm-bps: map-get(_jigsass-merge-sizes(), rhythm-unit);
+      $body-bps: map-get(_jigsass-merge-sizes(), body);
+
+      $bps: map-keys(map-merge($rhythm-bps, $body-bps));
+    }
+
+    @each $bp, $font-size in  $bps {
+      @include jigsass-mq($from: $bp) {
+        @include _jigsass-font-size($size, $lines, $context, $unit);
+      }
+    }
+  }
+
+  // Generate in current active breakpoint
+  @else {
+    @if ($bps and not mixin-exists(jigsass-mq)) {
+      @warn 'jigsass-font-size: Can\'t generate media queries - the `jigsass-mq` mixin does not ' +
+        'exist. Generating output outside a media query';
+    }
+    @include _jigsass-font-size($size, $lines, $context or jigsass-get-body-font-size(), $unit);
+  }
+}
+
+
+// ----- Borders ----- //
+/// Apply a border to an element without
+/// throwing off the vertical rhythm.
+/// ---
+/// @param {String} $side
+/// The side of the element to apply the border to.
+/// Can be one of { all | top | right | bottom | left }
+/// @param {String | Number | List} $width
+///   When a `String`: A named-size from the `$jigsass-sizes` palette.
+///
+///   When a `Number`: A length to be converted into the unit defined in `$unit`.
+///
+///   When a `List`: First item is the base for multiplication,
+///   second item is the multiplier, third, optional, item is the ratio.
+///   If there are only two items in the `name` list, ratio
+///   will resolve to the value of `$jigsass-default-ratio`.
+/// @param {Number} $lines [1]
+///   The number of typographic lines occupied by the border and padding add together.
+/// @param {String | List} $style [solid]
+///   The border style (and, oprionally, color).
+///
+///   Can take a string containing the border style, e.g `dotted` or
+///   a list containing the border style and color, e.g. `solid rebeccapurple`.
+/// ---
+@mixin jigsass-border($side, $width, $lines: 1, $style: solid, $bps: false) {
+  @if ($bps and mixin-exists(jigsass-mq)) {
+    @if ($bps == all) {
+      $_sizes: _jigsass-merge-sizes();
+      $bps: map-keys(map-get($_sizes, rhythm-unit));
+    }
+    @each $bp, $spacing in  $bps {
+      @include jigsass-mq($from: $bp) {
+        @include _jigsass-border($side, $width, $lines, $style);
+      }
+    }
+  }
+
+  // Generate in current active breakpoint
+  @else {
+    @if ($bps and not mixin-exists(jigsass-mq)) {
+      @warn 'jigsass-border: Can\'t generate media queries - the `jigsass-mq` mixin does not ' +
+        'exist. Generating output outside a media query';
+    }
+    @include _jigsass-border($side, $width, $lines, $style);
+  }
+}
+
+
+/// Apply a border-top without messing up the vertical rhythm.
+/// ---
+/// @param {String | Number | List} $width
+///   When a `String`: A named-size from the `$jigsass-sizes` palette.
+///
+///   When a `Number`: A length to be converted into the unit defined in `$unit`.
+///
+///   When a `List`: First item is the base for multiplication,
+///   second item is the multiplier, third, optional, item is the ratio.
+///   If there are only two items in the `name` list, ratio
+///   will resolve to the value of `$jigsass-default-ratio`.
+/// @param {Number} $lines [1]
+///   The number of typographic lines occupied by the border and padding add together.
+/// @param {String | List} $style [solid]
+///   The border style (and, oprionally, color).
+///
+///   Can take a string containing the border style, e.g `dotted` or
+///   a list containing the border style and color, e.g. `solid rebeccapurple`.
+/// ---
+@mixin jigsass-border-top($width, $lines: 1, $style: solid, $bps: false) {
+  @include jigsass-border(top, $width, $lines, $style, $bps);
+}
+
+
+/// Apply a border-bottom without messing up the vertical rhythm.
+/// ---
+/// @param {String | Number | List} $width
+///   When a `String`: A named-size from the `$jigsass-sizes` palette.
+///
+///   When a `Number`: A length to be converted into the unit defined in `$unit`.
+///
+///   When a `List`: First item is the base for multiplication,
+///   second item is the multiplier, third, optional, item is the ratio.
+///   If there are only two items in the `name` list, ratio
+///   will resolve to the value of `$jigsass-default-ratio`.
+/// @param {Number} $lines [1]
+///   The number of typographic lines occupied by the border and padding add together.
+/// @param {String | List} $style [solid]
+///   The border style (and, oprionally, color).
+///
+///   Can take a string containing the border style, e.g `dotted` or
+///   a list containing the border style and color, e.g. `solid rebeccapurple`.
+/// ---
+@mixin jigsass-border-bottom($width, $lines: 1, $style: solid, $bps: false) {
+  @include jigsass-border(bottom, $width, $lines, $style, $bps);
+}
+
+
+/// Apply a border to the top and bottom of an element
+/// without messing up the vertical rhythm.
+/// ---
+/// @param {String | Number | List} $width
+///   When a `String`: A named-size from the `$jigsass-sizes` palette.
+///
+///   When a `Number`: A length to be converted into the unit defined in `$unit`.
+///
+///   When a `List`: First item is the base for multiplication,
+///   second item is the multiplier, third, optional, item is the ratio.
+///   If there are only two items in the `name` list, ratio
+///   will resolve to the value of `$jigsass-default-ratio`.
+/// @param {Number} $lines [1]
+///   The number of typographic lines occupied by the border and padding add together.
+/// @param {String | List} $style [solid]
+///   The border style (and, oprionally, color).
+///
+///   Can take a string containing the border style, e.g `dotted` or
+///   a list containing the border style and color, e.g. `solid rebeccapurple`.
+/// ---
+@mixin jigsass-border-horizontal($width, $lines: 1, $style: solid, $bps: false) {
+  @include jigsass-border(top, $width, $lines, $style, $bps);
+  @include jigsass-border(bottom, $width, $lines, $style, $bps);
+}
+
+
+/// Apply a border to all sides of an element
+/// without messing up the vertical rhythm.
+/// ---
+/// @param {String | Number | List} $width
+///   When a `String`: A named-size from the `$jigsass-sizes` palette.
+///
+///   When a `Number`: A length to be converted into the unit defined in `$unit`.
+///
+///   When a `List`: First item is the base for multiplication,
+///   second item is the multiplier, third, optional, item is the ratio.
+///   If there are only two items in the `name` list, ratio
+///   will resolve to the value of `$jigsass-default-ratio`.
+/// @param {Number} $lines [1]
+///   The number of typographic lines occupied by the border and padding add together.
+/// @param {String | List} $style [solid]
+///   The border style (and, oprionally, color).
+///
+///   Can take a string containing the border style, e.g `dotted` or
+///   a list containing the border style and color, e.g. `solid rebeccapurple`.
+/// ---
+@mixin jigsass-borders($width, $lines: 1, $style: solid, $bps: false) {
+  @include jigsass-border(all, $width, $lines, $style, $bps);
+}
+
+
+// --- Private helper mixins --- //
+/// A private helper for use when setting font-size and line-height
+/// properties based on size and vertical rhythm configurations.
+/// ---
+/// @access private
+/// ---
+@mixin _jigsass-font-size($size, $lines, $context, $unit) {
+  $_rhythm: jigsass-get-rhythm-unit();
+  $size: jigsass-get-size($size, $context, $unit);
+  $height: jigsass-convert-length(
+    (($lines or jigsass-lines-for-size($size)) * $_rhythm),
+    rem
+  );
+
+  // Pixel fallback
+  @if ($jigsass-rem-px-fallback) {
+    @if (unit($size) == rem) {
+      font-size: jigsass-convert-length($size, px);
+    }
+    line-height: jigsass-convert-length($height, px);
+  }
+
+  font-size: $size;
+  line-height: $height;
+}
+
+
+/// A private helper for use when setting borders
+/// that don't mess up the vertical rhythm.
+/// ---
+/// @access private
+/// ---
+@mixin _jigsass-border($side, $width, $lines, $style) {
+  $_prop-suffix: if($side == all, '', '-#{$side}');
+  $_width: jigsass-get-size($width, $unit: rem);
+  $_padding: jigsass-rhythm($lines, $unit: rem) - $_width;
+
+  @if ($jigsass-rem-px-fallback) {
+    border#{$_prop-suffix}: jigsass-convert-length($_width, px) $style;
+    padding#{$_prop-suffix}: jigsass-convert-length($_padding, px);
+  }
+
+  border#{$_prop-suffix}: $_width $style;
+  padding#{$_prop-suffix}: $_padding;
+}

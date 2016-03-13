@@ -1,0 +1,41 @@
+// *************************************
+//
+// # Math utils
+//
+////
+/// @group _Math
+////
+//
+// *************************************
+
+@import './_pow-polyfill';
+
+// -------------------------------------
+// Function
+// -------------------------------------
+
+/// pow with non-integer exponents
+/// ---
+/// @param {Number} $base - The base number to be multiplied.
+/// @param {Number} $base - The exponent to use for multiplication.
+/// ---
+/// @return {Number} - The results of `$base` to power $exponent.
+/// ---
+/// @author [drtimofey](https://github.com/drtimofey)
+/// ---
+@function jigsass-pow($base, $exponent: 2) {
+  @if ($_fractional-pow-ok == false) {
+    @return math-pow-polyfill($base, $exponent); // use polyfill pow
+  }
+  @else {
+    @return math-pow($Base, $Exponent);  // use eyeglass-math pow
+  }
+}
+
+// Test if non-integer exponentiation is available
+@function _fractional-pow-ok() {
+  $test: math-pow(9, 0.5); // => 3 when pow works correctly with non-integer exponents
+  @return ($test == 3);
+}
+
+$_fractional-pow-ok: _fractional-pow-ok(); // cache result to improve performance

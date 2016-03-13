@@ -1,0 +1,336 @@
+//*************************************
+//
+// #Units
+// -> Unit conversion utils
+//
+////
+/// @group Typography - unit conversion
+////
+//
+// *************************************
+
+// -------------------------------------
+// Variables
+// -------------------------------------
+
+/// The font-size of the html element.
+/// _**Only re define this to fit your design if using
+/// `_units.scss` as a standalone module.** Otherwise,
+/// define the default size of the html element in
+/// the `rhythm-unit` key of the `$jigsass-sizes` map._
+/// ---
+/// @type Number
+/// ---
+$jigsass-units-root-font-size: 16px !default;
+
+
+
+
+
+// -------------------------------------
+// Functions
+// -------------------------------------
+
+/// Convert any CSS `length` or `percentage` value to any another.
+///
+/// Based on [accoutrement-scale/units](https://github.com/oddbird/accoutrement-scale)
+/// ---
+/// @param {number} $length
+///   The `length` or `percentage` to convert
+/// ---
+/// @param {string} $to-unit [$jigsass-default-unit]
+///   String matching a css unit keyword, e.g. `em`, `%`, etc.
+/// ---
+/// @param {number} $from-context [jigsass-get-body-font-size()]
+///   When converting from relative units, the absolute length (in px) to
+///   which $length refers (e.g. for $lengths in em units, would normally be the
+///   font-size of the current element).
+/// ---
+/// @param {number} $to-context
+///   For converting to relative units, the absolute length in px to which the
+///   output value will refer. Defaults to the same as `$from-context`, since it is
+///   rarely needed.
+/// ---
+/// @return {number}
+/// ---
+@function jigsass-convert-length(
+  $length,
+  $to-unit: if(global-variable-exists(jigsass-default-unit), $jigsass-default-unit, em),
+  $from-context: if(
+    function-exists(jigsass-get-body-font-size),
+    jigsass-get-body-font-size(),
+    $jigsass-units-root-font-size
+  ),
+  $to-context: $from-context
+) {
+  $_convertable: ('in', 'mm', 'cm', 'pt', 'pc', 'px', 'em', 'rem', '%', 'ex');
+  $from-unit: unit($length);
+  $root-size: null;
+
+  // Do nothing when `from` and `to` units are the same.
+  @if ($from-unit == $to-unit) { @return $length; }
+
+  // Warn and escape when units are not convertible
+  @each $unit in ($from-unit, $to-unit) {
+    @if not index($_convertable, $unit) {
+      @warn '#{$unit} units can’t be reliably converted; Returning original value.';
+
+      @return $length;
+    }
+  }
+
+  // Optimize comparable (non-relative) units
+  $absolute-output: _jigsass-type-get-number($to-unit);
+
+  @if $absolute-output and comparable($length, $absolute-output)  {
+    @return $absolute-output + $length;
+  }
+
+  // Establish relative context
+  @if (
+    function-exists(jigsass-get-rhythm-unit) and
+    global-variable-exists(jigsass-mq-active-breakpoint)
+  ) {
+    $root-size: jigsass-get-rhythm-unit();
+  }
+  @else {
+    $root-size: $jigsass-units-root-font-size;
+  }
+
+  @if (not $from-context) {
+    $from-context: if(
+      function-exists(jigsass-get-body-font-size),
+      jigsass-get-body-font-size(),
+      $jigsass-units-root-font-size
+    );
+    $to-context: $to-context or $from-context;
+  }
+  $from-context: _jigsass-type-get-px($from-context);
+  $to-context: _jigsass-type-get-px($to-context);
+
+  // Context values must be in px
+  @if (not $from-context) or (not $to-context) {
+    @error 'jigsass-convert-length: Context paremeters must resolve to a value in pixel units.';
+  }
+
+  // Convert relative length to pixels
+  $px-length: _jigsass-type-get-px($length) or $length;
+  $from-unit: unit($px-length);
+
+  // Convert relative units using the from-context parameter.
+  @if $from-unit == 'em' { $px-length: $length * $from-context / 1em; }
+  @else if $from-unit == 'rem' { $px-length: $length * $root-size / 1rem; }
+  @else if $from-unit == '%' { $px-length: $length * $from-context / 100%; }
+  @else if $from-unit == 'ex'  { $px-length: $length * $from-context / 2ex; }
+
+  // Convert length in pixels to the output unit
+  @if $absolute-output { @return $absolute-output + $px-length; }
+  @else if $to-unit == 'em' { @return $px-length * 1em / $to-context; }
+  @else if $to-unit == 'rem' { @return $px-length * 1rem / $root-size; }
+  @else if $to-unit == '%' { @return $px-length * 100% / $to-context; }
+  @else if $to-unit == 'ex' { @return $px-length * 2ex / $to-context; }
+
+  @error 'Failed to convert #{$length} into #{$to-units}.';
+}
+
+
+
+// ----- Private util functions ----- //
+
+/// Converted a value to px ig possible.
+/// ---
+/// @access private
+/// ---
+/// @param {Number} $length -
+///   The number to be converted to px if comparable.
+/// ---
+/// @return {Number | false} -
+///   Either the `px` value of the converted `$length` or `false`.
+/// ---
+@function _jigsass-type-get-px($length) {
+  // stylelint-disable
+  @return if(comparable($length, 1px), 0px + $length, false);
+  // stylelint-enable
+}
+
+
+/// Get a `0` value for any absolute unit.
+/// ---
+/// @access private
+/// ---
+/// @param {String} $unit -
+///   The unit to return as a number.
+/// ---
+/// @return {Number | false} -
+///   Either the `0` value of a unit or `false`.
+/// ---
+@function _jigsass-type-get-number($unit) {
+  // stylelint-disable
+  $_absolute: (
+    'in': 0in,
+    'mm': 0mm,
+    'cm': 0cm,
+    'pt': 0pt,
+    'pc': 0pc,
+    'px': 0px,
+  );
+  // stylelint-enable
+
+  @return map-get($_absolute, $unit) or false;
+}
+
+
+
+/// Get the px/rem versions of a value.
+/// ---
+/// @param {Number} $value - The value to convert
+/// ---
+/// @return {Map} A map of px corresponding rem values
+/// ---
+/// @access private
+/// ---
+@function _jigsass-rem-fallback-values($value) {
+  $_return: (
+    px: $value,
+    rem: $value,
+  );
+
+  @if type-of($value) == number and not unitless($value) {
+    @if unit($value) == rem {
+      // Since support for `rem` units and for media-queries is identical (ie > 8),
+      // when converting FROM rem, output pixel fallback at values converted to fit
+      // the settings of the static breakpoint (defined in `$jigsass-mq-static-breakpoint`)
+
+      // Cache the active breakpoint.
+      $_was-active-bp: $jigsass-mq-active-breakpoint;
+
+      // Set the active breakpoint to the static one
+      $jigsass-mq-active-breakpoint: $jigsass-mq-static-breakpoint !global;
+
+      $_return: map-merge($_return, (px: round(jigsass-convert-length($value, px))));
+
+      // Restore the active breakpoint.
+      $jigsass-mq-active-breakpoint: $_was-active-bp !global;
+    }
+    @else if unit($value) == px {
+      $_return: map-merge($_return, (
+        px: round($value),
+        rem: jigsass-convert-length($value, rem),
+      ));
+    }
+  }
+
+  @return $_return;
+}
+
+/// Get the px/rem versions of a list (or nested lists).
+/// ---
+/// @access private
+/// ---
+@function _jigsass-list-convert-rems($value) {
+  $_empty: (
+    px: (),
+    rem: (),
+  );
+  $_return: $_empty;
+  $_sep: null;
+
+  @if type-of($value) == list {
+    $_sep: list-separator($value);
+    @each $sub in $value {
+      $_this: _jigsass-list-convert-rems($sub);
+      $_return: (
+        px: append(map-get($_return, px), map-get($_this, px), $_sep),
+        rem: append(map-get($_return, rem), map-get($_this, rem), $_sep),
+      );
+    }
+  }
+  @else {
+    $_this: _jigsass-rem-fallback-values($value);
+    $_return: map-merge($_return, $_this);
+  }
+
+  @return $_return;
+}
+
+
+
+
+
+// -------------------------------------
+// Mixins
+// -------------------------------------
+
+/// Convert the values of a given property from
+/// px to rem at specified breakpoints.
+///
+/// Optionally include fallback in pixel values.
+/// -----
+/// @param {stirng} $property
+///   The css property name.
+/// @param {number | list | string} $values
+///   The value or list of values for the property.
+/// @param {String | List | Boolean} $bps (false)
+///    list of breakpoints to output the converted values in.
+///   `all` iterates over the breakpoints defined in
+///   the `rhythm-unit` key of the sizes palette.
+/// @param {Boolean} $px-fallback [$jigsass-rem-px-fallback]
+///   Determines if pixel fallback will be generated
+/// -----
+@mixin jigsass-rem(
+  $property,
+  $values,
+  $bps: false,
+  $px-fallback: $jigsass-rem-px-fallback
+) {
+  // iterate over the breakpoints defined in the `rhythm` key of the sizes palette.
+  @if ($bps and mixin-exists(jigsass-mq)) {
+    @if ($bps == all) {
+      $_sizes: _jigsass-merge-sizes();
+      $bps: map-keys(map-get($_sizes, rhythm-unit));
+    }
+    @each $bp, $spacing-unit in  $bps {
+      @include jigsass-mq($from: $bp) {
+        @include _jigsass-px2rem($property, $values, $px-fallback);
+      }
+    }
+  }
+
+  // Generate in current active breakpoint
+  @else {
+    @if ($bps and not mixin-exists(jigsass-mq)) {
+      @warn 'jigsass-rem: Can\'t generate media queries - the `jigsass-mq` mixin does not exist.' +
+        ' Generating output outside a media query';
+    }
+    @include _jigsass-px2rem($property, $values, $px-fallback);
+  }
+}
+
+
+/// Private helper function to convert the values
+/// of a given property from px to rem.
+/// Optionally include fallback in pixel values
+/// ---
+/// @param {String} $property
+///   The css property name.
+/// @param {Number | List | String} $values
+///   The value or list of values for the property.
+/// @param {Boolean} $px-fallback
+///   Determines if pixel fallback will be generated
+/// ---
+/// @access private
+/// ---
+@mixin _jigsass-px2rem($property, $values, $px-fallback) {
+  // Convert values.
+  $values: _jigsass-list-convert-rems($values);
+  $px-values: map-get($values, px);
+  $values: map-get($values, rem);
+
+  // Generate pixel fallback for browsers that don't understand rem units.
+  @if $px-fallback and $px-values != $values {
+    #{$property}: $px-values;
+  }
+
+  // Use rem values for everyone else (overrides pixel values).
+  #{$property}: $values;
+}

@@ -1,0 +1,406 @@
+// *************************************
+//
+// # Jigsass Typographic Settings
+// -> Typographic defaults and
+//    configuration for the
+//    JigSass framework.
+//
+////
+/// @group Typography - Settings
+////
+//
+// *************************************
+
+// -------------------------------------
+// Dependencies
+// -------------------------------------
+
+@import './math';
+
+@if (not global-variable-exists(jigsass-breakpoints)) {
+  @error 'jigsass-tools-typography/scss/lib/config has a dependency' +
+    ' on `jigsass-tools-mq`. Please import it before importing this file.';
+}
+
+@if (not function-exists(jigsass-deep-merge)) {
+  @error 'jigsass-tools-typography/scss/lib/config has a dependency' +
+    ' on `jigsass-tools-maps`. Please import it before importing this file.';
+}
+
+
+
+
+
+// -------------------------------------
+// Functions
+// -------------------------------------
+
+/// Get the spacing unit for a given breakpoint
+///
+/// If a spacing unit isn't explicitly defined in the
+/// `rhythm-unit` key of the sizes palette map for the given
+/// breakpoint, the spacing unit for the last previously
+/// defined breakpoint will be used.
+/// ---
+/// @param {String} $bp [$jigsass-mq-active-breakpoint]
+///   The breakpoint to get a spacing-unit for.
+/// ---
+/// @return {number} - The base spacing unit for the passed breakpoint.
+/// ---
+@function jigsass-get-rhythm-unit($bp: $jigsass-mq-active-breakpoint) {
+  // Merge default and user-defined sizes
+  $_sizes: _jigsass-merge-sizes();
+
+  @if (not map-has-key($_sizes, rhythm-unit)) {
+    @error 'jigsass-get-rhythm-unit: `rhythm-unit` is not defined in the the sizes pallete.'
+  }
+
+  $_rhythm: _jigsass-get-config-bp-value($bp, map-get($_sizes, rhythm-unit));
+
+  @if (not type-of($_rhythm) == number and unit($_rhythm) == px) {
+    @error 'jigsass-get-rhythm-unit: `rhythm-unit` should be a ' +
+      'number in pixels, but it is #{$_rhythm}.'
+  }
+  @return $_rhythm;
+}
+
+
+/// Get the base font-size for a given breakpoint
+///
+/// If a font-size isn't explicitly defined in the
+/// `body` key of the sizes palette map for the given
+/// breakpoint, the font-size for the last previously
+/// defined breakpoint will be used.
+/// ---
+/// @param {String} $bp [$jigsass-mq-active-breakpoint]
+///   The breakpoint to get a font-size for.
+/// ---
+/// @return {number} - The base font-size for the passed breakpoint.
+/// ---
+@function jigsass-get-body-font-size($bp: $jigsass-mq-active-breakpoint) {
+  // Merge default and user-defined sizes
+  $_sizes: _jigsass-merge-sizes();
+
+  @if (not map-has-key($_sizes, body)) {
+    @error 'jigsass-get-body-font-size: `body` is not defined in the the sizes pallete.'
+  }
+
+  $_font-size: _jigsass-get-config-bp-value($bp, map-get($_sizes, body));
+
+  @if (not type-of($_font-size) == number and unit($_font-size) == px) {
+    @error 'jigsass-get-body-font-size: `body` should be a ' +
+      'number in pixels, but it is #{$_font-size}.'
+  }
+  @return $_font-size;
+}
+
+
+/// Get the minimal padding between lines of text for a given breakpoint
+///
+/// If a minimal line-padding isn't explicitly defined in the
+/// `min-line-padding` key of the sizes palette map for the given
+/// breakpoint, the padding for the last previously
+/// defined breakpoint will be used.
+/// ---
+/// @param {String} $bp [$jigsass-mq-active-breakpoint]
+///   The breakpoint to get padding for.
+/// ---
+/// @return {number} - The minimal padding between lines of text for the passed breakpoint.
+/// ---
+@function jigsass-get-min-line-padding($bp: $jigsass-mq-active-breakpoint) {
+  // Merge default and user-defined sizes
+  $_sizes: _jigsass-merge-sizes();
+
+  @if (not map-has-key($_sizes, min-line-padding)) {
+    @error 'jigsass-get-min-line-padding: `min-line-padding` is not defined in the the sizes pallete.'
+  }
+
+  $_min-padding: _jigsass-get-config-bp-value($bp, map-get($_sizes, min-line-padding));
+
+  @if (not type-of($_min-padding) == number and unit($_min-padding) == px) {
+    @error 'jigsass-get-min-line-padding: `min-line-padding` should be a ' +
+      'number in pixels, but it is #{$_min-padding}.'
+  }
+  @return $_min-padding;
+}
+
+/// Retrieve the value of a named size from the `$jigsass-sizes` palette.
+/// ---
+/// @param {String | Number | List} $size
+///   When a `String`: A named-size from the `$jigsass-sizes` palette.
+///
+///   When a `Number`: A length to be converted into the unit defined in `$unit`.
+///
+///   When a `List`: First item is the base for multiplication,
+///   second item is the multiplier, third, optional, item is the ratio.
+///   If there are only two items in the `name` list, ratio
+///   will resolve to the value of `$jigsass-default-ratio`.
+/// @param {Number} $context [jigsass-get-body-font-size()]
+///   When converting to or from relative units, the absolute length (in px)
+///   which is the basis of conversion (e.g. for $lengths in em units, would
+///   normally be the font-size of the current element).
+/// @param {String} $unit [$jigsass-default-unit]
+///   The output unit to convert `$size` to.
+/// ---
+/// @return {Number} - The size, converted to the specified unit.
+/// ---
+@function jigsass-get-size(
+  $size,
+  $context: jigsass-get-body-font-size(),
+  $unit: $jigsass-default-unit
+) {
+  // Merge default and user-defined sizes
+  $_sizes: _jigsass-merge-sizes();
+
+  // Get size
+  $_size-bps: map-get($_sizes, $size);
+  $_bp: $jigsass-mq-active-breakpoint;
+  $_size: if($_size-bps, _jigsass-get-config-bp-value($_bp, $_size-bps), $size);
+  $_base: nth($_size, 1);
+  $_power: if(length($_size) > 1, nth($_size, 2), null);
+  $_ratio: if(length($_size) > 2, nth($_size, 3), $jigsass-default-ratio);
+
+  // Recurse if `$base` is an alias for another size.
+  $_size: if(
+    map-has-key($_sizes, $_base),
+    jigsass-get-size($_base, $context, false),
+    $_base
+  );
+
+  // Calculate size
+  @if ($_power) {
+    $_ratio: _jigsass-get-ratio($_ratio);
+    $_size: round($_size * jigsass-pow($_ratio, $_power));
+  }
+
+  @if (type-of($_size) != number) {
+    @error 'jigsass-get-size: `#{$_size}` is a `#{type-of($_size)}`, not a valid CSS length.'
+  }
+
+  @if $unit and not index('ch' 'vw' 'vh' 'vmin' 'vmax', unit($_size)) {
+    $_size: jigsass-convert-length($_size, $unit, $from-context: $context);
+  }
+
+  @return $_size;
+}
+
+
+/// A util function to merge default and user-defined sizes.
+/// ---
+/// @return {Map}
+/// ---
+/// @access private
+/// ---
+@function _jigsass-merge-sizes() {
+  @return jigsass-deep-merge($_jigsass-default-sizes, $jigsass-sizes);
+}
+
+
+/// Get the value of a base unit for a given breakpoint
+///
+/// If a unit isn't explicitly defined in the `$source` map
+/// for the given breakpoint, the spacing unit for
+/// the last previously defined breakpoint will be used.
+/// ---
+/// @param {String} $bp - The breakpoint to get a spacing-unit for.
+/// @param {Map} $source - The map of spacing units to search in.
+/// ---
+/// @return {number} - The base unit for the passed breakpoint.
+/// ---
+@function _jigsass-get-config-bp-value($bp, $source) {
+  @if (type-of($source) != map) {
+    @error '_jigsass-get-config-bp-value: #{inspect($source)} is a #{type-of($source)}, not a map.'
+  }
+  @if (map-get($source, $bp)) {
+    @return (map-get($source, $bp));
+  }
+
+  $_base-unit: null;
+  @each $bp-name, $bp-value in map-get($jigsass-breakpoints, lengths) {
+    $_base-unit: map-get($source, $bp-name) or $_base-unit;
+
+    @if ($bp-name == $bp) {
+      @return $_base-unit;
+    }
+  }
+
+  // If nothing was found, return the value of the
+  // first unit in $source
+  @return nth(nth($source, 1), 2);
+}
+
+
+/// Get a ratio's value by name or number.
+/// ---
+/// @access private
+/// ---
+/// @param {String | Number} $ratio
+///   The name of a ratio, or a number to serve as the ratio.
+/// ---
+/// @return {Number}
+/// ---
+@function _jigsass-get-ratio($ratio) {
+  // Merge default and user-defined ratios.
+  $_ratios: map-merge($_jigsass-ratios, $jigsass-ratios);
+  $_extracted-ratio: map-get($_ratios, $ratio);
+
+  // Recurse if ratio is an alias to another ratio
+  @if ($ratio != $_extracted-ratio and map-has-key($_ratios, $_extracted-ratio)) {
+    $_extracted-ratio: _jigsass-get-ratio($_extracted-ratio);
+  }
+
+  @if (type-of($_extracted-ratio) != number) {
+    @error '`#{$_extracted-ratio}` is not a defined ratio.'
+  }
+
+  @return $_extracted-ratio;
+}
+
+
+
+
+
+// -------------------------------------
+// Variables
+// -------------------------------------
+
+/// The default output unit.
+/// ---
+/// @type String
+/// ---
+$jigsass-default-unit: rem !default;
+
+/// Should fallback values in px also be outputted when outputting rems.
+/// ---
+/// @type Boolean
+/// ---
+$jigsass-rem-px-fallback: false !default;
+
+/// Common ratios for building modular scales.
+///
+/// To add your own ratios, define the `$jigsass-ratios`
+/// map.
+/// ---
+/// @type Map
+/// ---
+/// @access private
+/// ---
+/// @link http://www.modularscale.com
+/// ---
+$_jigsass-ratios: (
+  golden: 1.618,
+  minor-second: 1.067,
+  major-second: 1.125,
+  minor-third: 1.2,
+  major-third: 1.25,
+  perfect-fourth: 1.333,
+  augmented-fourth: 1.414,
+  perfect-fifth: 1.5,
+  minor-sixth: 1.6,
+  major-sixth: 1.667,
+  minor-seventh: 1.778,
+  major-seventh: 1.875,
+  octave: 2,
+  major-tenth: 2.5,
+  major-eleventh: 2.667,
+  major-twelfth: 3,
+  double-octave: 4,
+);
+
+
+/// User-defined ratios for modular scales.
+///
+/// **Define your own values BEFORE importing.**
+/// ---
+/// @type Map
+/// ---
+$jigsass-ratios: () !default;
+
+/// The default ratio used to construct modular scales.
+/// ---
+/// @type String
+/// ---
+$jigsass-default-ratio: major-second !default;
+
+
+/// Default named sizes required by `jigsass-tools-typography`
+///
+/// **Do not directly redefine this map.** To override with
+/// your own values, define these and other named sizes in
+/// `$jigsass-sizes` before importing this file.
+/// ---
+/// @prop {Map} rhythm-unit [(default: 6px)]
+///   The basic spacing unit to construct
+///   vertical rhythm from. Should be a quarter
+///   of the desired basic line-height in a given
+///   breakpoint.
+///
+///   Will be used to set the font-size on the `html`
+///   element in percentage.
+///
+///   Breakpoint names must correspond with those defined
+///   in `$jigsass-breakpoints.lengths`
+/// @prop {Map} body [(default: 16px)]
+///   Base font size in pixels for each breakpoint,
+///
+///   Will be used to define the font-size on the `body` element.
+///
+///   Breakpoint names must correspond with those defined
+///   in `$jigsass-breakpoints.lengths`
+/// @prop {Map} min-line-padding [(default: 2px)]
+///   The minimum amount of pixels above
+///   and below text lines
+///
+///   Breakpoint names must correspond with those defined
+///   in `$jigsass-breakpoints.lengths`
+/// ---
+/// @access private
+/// ---
+$_jigsass-default-sizes: (
+  rhythm-unit: (
+    default: 6px
+  ),
+  body: (
+    default: 16px
+  ),
+  min-line-padding: (
+    default: 2px
+  )
+);
+
+/// Reusable responsive named sizes
+///
+/// A per-breakpoint mapping of name to sizes formatted as
+/// `name: size` or `name: base multiplier [ratio]`
+/// ---
+/// @property {Map} size
+///   Values of given size at different breakpoints
+/// @property {Number | List | String} size.breakpoint
+///   The assigned size at the given breakpoint.
+///
+///   When a `List`: First item is the base for multiplication,
+///   second item is the multiplier, third, optional, item is the ratio.
+///   If there are only two items in the `name` list, ratio
+///   will resolve to the value of `$jigsass-default-ratio`.
+///
+///   When a `String`: An alias to another size.
+/// ---
+/// @type Map
+/// ---
+$jigsass-sizes: (
+  // --- Font sizes --- //
+  // Incremented sizes example
+  // type1: (
+  //   default: body 1/* $jigsass-default-ratio*/
+  // ),
+
+  // Decremented sizes
+  // type-min1: (
+  //   default: body -1
+  // ),
+
+  // --- Lengths --- //
+  // page: (
+  //   default: null
+  // ),
+) !default;

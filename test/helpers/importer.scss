@@ -1,0 +1,42 @@
+// *****************************
+// Importer for testing partials
+// *****************************
+
+@charset 'UTF-8';
+
+// General use testing helpers
+@import 'test/helpers/_test-helpers.scss';
+
+// Import dependencies
+@import 'node_modules/jigsass-tools-maps/scss/index';
+@import 'node_modules/jigsass-tools-mq/scss/index';
+
+
+// Assigned with default so the it can be overridden
+// from within a test.
+$jigsass-sizes: (
+rhythm-unit: (default: 6px, tiny: 7px),
+body: (default: 16px, tiny: 18px),
+
+// Incremented sizes
+type1: (
+default: body 1/* $jigsass-default-ratio*/
+),
+
+// Decremented sizes
+type-min1: (
+default: body -1
+),
+
+border: (default: 3px),
+
+// test
+number: (default: 12px, tiny: 14px),
+scale: (default: number 2, tiny: number 2),
+ratio: (default: number 2 octave, tiny: number 2 octave),
+neg: (default: number -1)
+) !default;
+
+
+// Import project files.
+@import 'scss/index';
