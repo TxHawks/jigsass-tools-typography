@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "jigsass-tools-maps": "^1.0.3",
-    "jigsass-tools-mq": "^1.2.3"
+    "jigsass-tools-mq": "^1.2.5"
   },
   "devDependencies": {
     "autoprefixer": "^6.3.3",
