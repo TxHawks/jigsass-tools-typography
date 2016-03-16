@@ -133,6 +133,26 @@ $jigsass-units-root-font-size: 16px !default;
   @error 'Failed to convert #{$length} into #{$to-units}.';
 }
 
+/// Convert a length to a unitless number
+/// ---
+/// @param {Number} $num - The number to strip the unit from
+/// ---
+/// @return {Number}
+/// ---
+/// @access private
+/// ---
+@function jigsass-strip-unit($num) {
+  @if (type-of($num) != number) {
+    @error 'jigsass-strip-unit: `#{$num}` is a #{type-of($num)}, not a number.'
+  }
+
+  @if (not unitless($num)) {
+    $num: $num / ($num * 0 + 1);
+  }
+
+  @return $num;
+}
+
 
 
 // ----- Private util functions ----- //

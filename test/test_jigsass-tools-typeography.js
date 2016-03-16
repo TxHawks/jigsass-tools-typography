@@ -198,6 +198,42 @@ describe('jigsass-tools-typography', () => {
       });
     });
 
+    describe('jigsass-strip-unit [Function]', () => {
+      it('strips px units', () => {
+        sassaby.func('jigsass-strip-unit')
+          .calledWithArgs('12px')
+          .equals('12');
+      });
+
+      it('strips em units', () => {
+        sassaby.func('jigsass-strip-unit')
+          .calledWithArgs('0em')
+          .equals('0');
+      });
+
+      it('strips rem units', () => {
+        sassaby.func('jigsass-strip-unit')
+          .calledWithArgs('10rem')
+          .equals('10');
+      });
+
+      it('strips percentages', () => {
+        sassaby.func('jigsass-strip-unit')
+          .calledWithArgs('100%')
+          .equals('100');
+      });
+
+      it('Trows when argument isn\'t a number', () => {
+        assert.throws(
+          () => {
+            sassaby.func('jigsass-strip-unit')
+              .calledWithArgs('str')
+          },
+        /jigsass-strip-unit: `str` is a string. not a number/
+      );
+      });
+    });
+
     describe('jigsass-rem [mixin]', () => {
       it('Outputs a converted pixel value in rem', () => {
         sassaby.includedMixin('jigsass-rem')
