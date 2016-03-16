@@ -4,7 +4,7 @@
     "name": "TxHawks",
     "email": "tofu.hawks@gmail.com"
   },
-  "version": "1.1.0",
+  "version": "1.1.1",
   "main": "index.scss",
   "files": [
     "scss"
@@ -35,8 +35,8 @@
     "prepublish": "gulp prepublish"
   },
   "dependencies": {
-    "jigsass-tools-maps": "^1.0.3",
-    "jigsass-tools-mq": "^1.2.5"
+    "jigsass-tools-maps": "^1.0.5",
+    "jigsass-tools-mq": "^1.3.0"
   },
   "devDependencies": {
     "autoprefixer": "^6.3.3",
