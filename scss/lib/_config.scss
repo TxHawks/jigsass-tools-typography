@@ -385,22 +385,60 @@ $_jigsass-default-sizes: (
 ///
 ///   When a `String`: An alias to another size.
 /// ---
+/// @example
+///   $jigsass-sizes: (
+///     //  --- Override default sizes --- //
+///     rhythm-unit: (
+///       default: 6px,
+///       large: 7px
+///     ),
+///     body: (
+///       default: 16px,
+///       large: 18px
+///     ),
+///
+///     //  --- Font sizes --- //
+///     zeta: (
+///       default: body
+///     ),
+///     milli: (
+///       default: body -1/* , $jigsass-default-ratio */
+///     ),
+///
+///     // --- Lengths --- //
+///     page: (
+///       xl: 1200px
+///     ),
+///   );
+/// ---
 /// @type Map
 /// ---
 $jigsass-sizes: (
-  // --- Font sizes --- //
-  // Incremented sizes example
-  // type1: (
-  //   default: body 1/* $jigsass-default-ratio*/
-  // ),
+  // headings
+  zeta: (
+    default: body
+  ),
+  epsilon: (
+    default: body 1
+  ),
+  delta: (
+    default: body 2
+  ),
+  gamma: (
+    default: body 3
+  ),
+  beta: (
+    default: body 4
+  ),
+  alpha: (
+    default: body 5
+  ),
 
-  // Decremented sizes
-  // type-min1: (
-  //   default: body -1
-  // ),
-
-  // --- Lengths --- //
-  // page: (
-  //   default: null
-  // ),
+  // small print
+  milli: (
+    default: body -1
+  ),
+  micro: (
+    default: body -2
+  )
 ) !default;
