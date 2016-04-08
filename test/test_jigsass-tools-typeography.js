@@ -34,21 +34,21 @@ describe('jigsass-tools-typography', () => {
     describe('_jigsass-get-config-bp-value [function]', () => {
       it('Returns the value of an explicitly defined breakpoint', () => {
         sassaby.func('_jigsass-get-config-bp-value')
-          .calledWithArgs('default', 'map-get(_jigsass-merge-sizes(), body)')
+          .calledWithArgs('default', 'map-get(jigsass-merge-sizes(), body)')
           .equals('16px');
       });
 
       it('Returns the value of the previously defined breakpoint ' +
         'for implicitly defined breakpoints', () => {
         sassaby.func('_jigsass-get-config-bp-value')
-          .calledWithArgs('large', 'map-get(_jigsass-merge-sizes(), body)')
+          .calledWithArgs('large', 'map-get(jigsass-merge-sizes(), body)')
           .equals('18px');
       });
 
       it('Returns the value of the first defined breakpoint ' +
         'when an undefined breakpoint is passed', () => {
         sassaby.func('_jigsass-get-config-bp-value')
-          .calledWithArgs('bogus', 'map-get(_jigsass-merge-sizes(), body)')
+          .calledWithArgs('bogus', 'map-get(jigsass-merge-sizes(), body)')
           .equals('16px');
       });
 

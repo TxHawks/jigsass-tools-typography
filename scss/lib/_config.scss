@@ -49,7 +49,7 @@
 /// ---
 @function jigsass-get-rhythm-unit($bp: $jigsass-mq-active-breakpoint) {
   // Merge default and user-defined sizes
-  $_sizes: _jigsass-merge-sizes();
+  $_sizes: jigsass-merge-sizes();
 
   @if (not map-has-key($_sizes, rhythm-unit)) {
     @error 'jigsass-get-rhythm-unit: `rhythm-unit` is not defined in the the sizes pallete.'
@@ -79,7 +79,7 @@
 /// ---
 @function jigsass-get-body-font-size($bp: $jigsass-mq-active-breakpoint) {
   // Merge default and user-defined sizes
-  $_sizes: _jigsass-merge-sizes();
+  $_sizes: jigsass-merge-sizes();
 
   @if (not map-has-key($_sizes, body)) {
     @error 'jigsass-get-body-font-size: `body` is not defined in the the sizes pallete.'
@@ -109,7 +109,7 @@
 /// ---
 @function jigsass-get-min-line-padding($bp: $jigsass-mq-active-breakpoint) {
   // Merge default and user-defined sizes
-  $_sizes: _jigsass-merge-sizes();
+  $_sizes: jigsass-merge-sizes();
 
   @if (not map-has-key($_sizes, min-line-padding)) {
     @error 'jigsass-get-min-line-padding: `min-line-padding` is not defined in the the sizes pallete.'
@@ -150,7 +150,7 @@
   $unit: $jigsass-default-unit
 ) {
   // Merge default and user-defined sizes
-  $_sizes: _jigsass-merge-sizes();
+  $_sizes: jigsass-merge-sizes();
 
   // Get size
   $_size-bps: map-get($_sizes, $size);
@@ -189,9 +189,7 @@
 /// ---
 /// @return {Map}
 /// ---
-/// @access private
-/// ---
-@function _jigsass-merge-sizes() {
+@function jigsass-merge-sizes() {
   @return jigsass-deep-merge($_jigsass-default-sizes, $jigsass-sizes);
 }
 

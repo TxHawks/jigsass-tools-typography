@@ -306,7 +306,7 @@ $jigsass-units-root-font-size: 16px !default;
   // iterate over the breakpoints defined in the `rhythm` key of the sizes palette.
   @if ($bps and mixin-exists(jigsass-mq)) {
     @if ($bps == all) {
-      $_sizes: _jigsass-merge-sizes();
+      $_sizes: jigsass-merge-sizes();
       $bps: map-keys(map-get($_sizes, rhythm-unit));
     }
     @each $bp, $spacing-unit in  $bps {

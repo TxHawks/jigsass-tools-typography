@@ -140,7 +140,7 @@ $_jigsass-browser-default-font-size: 16px;
 /// ---
 @mixin jigsass-set-baseline() {
   @at-root html {
-    $bps: map-get(_jigsass-merge-sizes(), rhythm-unit);
+    $bps: map-get(jigsass-merge-sizes(), rhythm-unit);
     @each $bp, $value in $bps {
       @include jigsass-mq($bp) {
         font-size: jigsass-get-rhythm-unit() / $_jigsass-browser-default-font-size * 100%;
@@ -148,7 +148,7 @@ $_jigsass-browser-default-font-size: 16px;
     }
   }
   @at-root body {
-    $bps: map-get(_jigsass-merge-sizes(), body);
+    $bps: map-get(jigsass-merge-sizes(), body);
     @each $bp, $value in $bps {
       @include jigsass-mq($bp) {
         font-size: jigsass-convert-length(
@@ -218,8 +218,8 @@ $_jigsass-browser-default-font-size: 16px;
 ) {
   @if ($bps and mixin-exists(jigsass-mq)) {
     @if ($bps == all) {
-      $rhythm-bps: map-get(_jigsass-merge-sizes(), rhythm-unit);
-      $size-bps: map-get(_jigsass-merge-sizes(), $size) or ();
+      $rhythm-bps: map-get(jigsass-merge-sizes(), rhythm-unit);
+      $size-bps: map-get(jigsass-merge-sizes(), $size) or ();
 
       $bps: map-keys(map-merge($rhythm-bps, $size-bps));
     }
@@ -269,7 +269,7 @@ $_jigsass-browser-default-font-size: 16px;
 @mixin jigsass-border($side, $width, $lines: 1, $style: solid, $bps: false) {
   @if ($bps and mixin-exists(jigsass-mq)) {
     @if ($bps == all) {
-      $_sizes: _jigsass-merge-sizes();
+      $_sizes: jigsass-merge-sizes();
       $bps: map-keys(map-get($_sizes, rhythm-unit));
     }
     @each $bp, $spacing in  $bps {
