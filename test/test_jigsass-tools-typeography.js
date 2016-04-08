@@ -385,8 +385,7 @@ describe('jigsass-tools-typography', () => {
           .declares('line-height', '5rem');
       });
 
-      it('Iterates over all breakpoints defined in `$jigsass-base-spacing-unit` ' +
-        'and `$jigsass-base-font-size`',
+      it('Iterates over all breakpoints defined for `rhythm-unit` and `$size`',
         () => {
         sassaby.includedMixin('jigsass-font-size')
           .calledWithArgs('type1', 'all')

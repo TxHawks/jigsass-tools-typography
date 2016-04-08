@@ -195,6 +195,11 @@ $_jigsass-browser-default-font-size: 16px;
 ///   second item is the multiplier, third, optional, item is the ratio.
 ///   If there are only two items in the `name` list, ratio
 ///   will resolve to the value of `$jigsass-default-ratio`.
+/// @param {String | List | Boolean} $bps [false]
+///   A list of breakpoints to generate font-size in.
+///   `all` will generate a font-size definition for each rhythm-unit
+///   breakpoint and each breakpoint defined for `$size` in the
+///   `$jigsass-sizes` map.
 /// @param {Number | Boolean} $lines [false]
 ///   Override the default number of typographic lines occupied by the element.
 /// @param {Number | Boolean} $context [false]
@@ -214,12 +219,12 @@ $_jigsass-browser-default-font-size: 16px;
   @if ($bps and mixin-exists(jigsass-mq)) {
     @if ($bps == all) {
       $rhythm-bps: map-get(_jigsass-merge-sizes(), rhythm-unit);
-      $body-bps: map-get(_jigsass-merge-sizes(), body);
+      $size-bps: map-get(_jigsass-merge-sizes(), $size) or ();
 
-      $bps: map-keys(map-merge($rhythm-bps, $body-bps));
+      $bps: map-keys(map-merge($rhythm-bps, $size-bps));
     }
 
-    @each $bp, $font-size in  $bps {
+    @each $bp in  $bps {
       @include jigsass-mq($from: $bp) {
         @include _jigsass-font-size($size, $lines, $context, $unit);
       }
