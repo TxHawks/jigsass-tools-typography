@@ -143,7 +143,7 @@ $jigsass-units-root-font-size: 16px !default;
 /// ---
 @function jigsass-strip-unit($num) {
   @if (type-of($num) != number) {
-    @error 'jigsass-strip-unit: `#{$num}` is a #{type-of($num)}, not a number.'
+    @error 'jigsass-strip-unit: `#{$num}` is a #{type-of($num)}, not a number.';
   }
 
   @if (not unitless($num)) {

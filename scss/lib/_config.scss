@@ -52,14 +52,14 @@
   $_sizes: jigsass-merge-sizes();
 
   @if (not map-has-key($_sizes, rhythm-unit)) {
-    @error 'jigsass-get-rhythm-unit: `rhythm-unit` is not defined in the the sizes pallete.'
+    @error 'jigsass-get-rhythm-unit: `rhythm-unit` is not defined in the the sizes pallete.';
   }
 
   $_rhythm: _jigsass-get-config-bp-value($bp, map-get($_sizes, rhythm-unit));
 
   @if (not type-of($_rhythm) == number and unit($_rhythm) == px) {
     @error 'jigsass-get-rhythm-unit: `rhythm-unit` should be a ' +
-      'number in pixels, but it is #{$_rhythm}.'
+      'number in pixels, but it is #{$_rhythm}.';
   }
   @return $_rhythm;
 }
@@ -82,14 +82,14 @@
   $_sizes: jigsass-merge-sizes();
 
   @if (not map-has-key($_sizes, body)) {
-    @error 'jigsass-get-body-font-size: `body` is not defined in the the sizes pallete.'
+    @error 'jigsass-get-body-font-size: `body` is not defined in the the sizes pallete.';
   }
 
   $_font-size: _jigsass-get-config-bp-value($bp, map-get($_sizes, body));
 
   @if (not type-of($_font-size) == number and unit($_font-size) == px) {
     @error 'jigsass-get-body-font-size: `body` should be a ' +
-      'number in pixels, but it is #{$_font-size}.'
+      'number in pixels, but it is #{$_font-size}.';
   }
   @return $_font-size;
 }
@@ -112,14 +112,15 @@
   $_sizes: jigsass-merge-sizes();
 
   @if (not map-has-key($_sizes, min-line-padding)) {
-    @error 'jigsass-get-min-line-padding: `min-line-padding` is not defined in the the sizes pallete.'
+    @error 'jigsass-get-min-line-padding: `min-line-padding` is not defined in ' +
+      'the the sizes pallete.';
   }
 
   $_min-padding: _jigsass-get-config-bp-value($bp, map-get($_sizes, min-line-padding));
 
   @if (not type-of($_min-padding) == number and unit($_min-padding) == px) {
     @error 'jigsass-get-min-line-padding: `min-line-padding` should be a ' +
-      'number in pixels, but it is #{$_min-padding}.'
+      'number in pixels, but it is #{$_min-padding}.';
   }
   @return $_min-padding;
 }
@@ -174,7 +175,7 @@
   }
 
   @if (type-of($_size) != number) {
-    @error 'jigsass-get-size: `#{$_size}` is a `#{type-of($_size)}`, not a valid CSS length.'
+    @error 'jigsass-get-size: `#{$_size}` is a `#{type-of($_size)}`, not a valid CSS length.';
   }
 
   @if $unit and not index('ch' 'vw' 'vh' 'vmin' 'vmax', unit($_size)) {
@@ -207,7 +208,8 @@
 /// ---
 @function _jigsass-get-config-bp-value($bp, $source) {
   @if (type-of($source) != map) {
-    @error '_jigsass-get-config-bp-value: #{inspect($source)} is a #{type-of($source)}, not a map.'
+    @error '_jigsass-get-config-bp-value: #{inspect($source)} ' +
+      'is a #{type-of($source)}, not a map.';
   }
   @if (map-get($source, $bp)) {
     @return (map-get($source, $bp));
@@ -248,7 +250,7 @@
   }
 
   @if (type-of($_extracted-ratio) != number) {
-    @error '`#{$_extracted-ratio}` is not a defined ratio.'
+    @error '`#{$_extracted-ratio}` is not a defined ratio.';
   }
 
   @return $_extracted-ratio;
