@@ -28,7 +28,7 @@
     @return math-pow-polyfill($base, $exponent); // use polyfill pow
   }
   @else {
-    @return math-pow($Base, $Exponent);  // use eyeglass-math pow
+    @return math-pow($base, $exponent);  // use eyeglass-math pow
   }
 }
 
