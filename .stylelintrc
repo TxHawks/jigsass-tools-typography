@@ -4,18 +4,18 @@
     "color-hex-length": "short",
     "color-no-invalid-hex": true,
 
-    "font-family-name-quotes": "single-where-recommended",
+    "font-family-name-quotes": "always-where-recommended",
     "font-weight-notation": "numeric",
 
     "function-calc-no-unspaced-operator": true,
     "function-comma-space-after": "always-single-line",
     "function-comma-space-before": "never",
     "function-parentheses-space-inside": "never-single-line",
-    "function-url-quotes": "single",
+    "function-url-quotes": "always",
     "function-whitespace-after": "always",
 
     "number-no-trailing-zeros": true,
-    "number-zero-length-no-unit": true,
+    "length-zero-no-unit": true,
 
     "string-quotes": "single",
 
@@ -55,8 +55,8 @@
     "media-feature-no-missing-punctuation": true,
     "media-feature-range-operator-space-after": "always",
     "media-feature-range-operator-space-before": "always",
+    "media-feature-parentheses-space-inside": "never",
 
-    "media-query-parentheses-space-inside": "never",
     "media-query-list-comma-newline-after": "always-multi-line",
     "media-query-list-comma-space-after": "always",
 
