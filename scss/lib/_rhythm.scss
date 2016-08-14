@@ -137,7 +137,7 @@ $_jigsass-browser-default-font-size: 16px;
 /// Additionally sets a line-height of `4rem` on the `body` element,
 /// and a font-size in each breakpoint defined in `$jigsass-get-body-font-size`;
 /// ---
-/// @param {Boolean} percentage - Set the html element's font-size in % instead of px
+/// @param {Boolean} percentage [true] - Set the html element's font-size in % instead of px
 /// ---
 @mixin jigsass-set-baseline($percentage: true) {
   @at-root html {
