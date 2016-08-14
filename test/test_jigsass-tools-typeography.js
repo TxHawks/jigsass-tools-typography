@@ -354,8 +354,14 @@ describe('jigsass-tools-typography', () => {
           .called()
           .createsSelector('body');
       });
-
       it('Declares the correct properties with correct values in correct breakpoints', () => {
+        sassaby.standaloneMixin('jigsass-set-baseline')
+          .calledWithArgs('false')
+          .equals('html{font-size:6px}@media(min-width:20em){html{font-size:7px}}body{font-size:2.66667em;line-height:4rem}@media(min-width:20em){body{font-size:2.57143em}}');
+      });
+
+
+      it('Declares the correct properties in percentage with correct values in correct breakpoints', () => {
         sassaby.standaloneMixin('jigsass-set-baseline')
           .called()
           .equals('html{font-size:37.5%}@media(min-width:20em){html{font-size:43.75%}}body{font-size:2.66667em;line-height:4rem}@media(min-width:20em){body{font-size:2.57143em}}');

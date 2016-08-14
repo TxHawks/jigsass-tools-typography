@@ -131,19 +131,25 @@ $_jigsass-browser-default-font-size: 16px;
 // ----- Establish baseline ----- //
 /// Establish a responsive typographic baseline.
 ///
-/// Sets a font-size in percentage, which is a fourth of the
-/// basic line-height on the `html` element in every breakpoint
-/// defined in `$jigsass-sizes.rhythm-unit`.
+/// Sets the font-size of the `html` element to a single rhythm unit
+/// in every breakpoint defined in `$jigsass-sizes.rhythm-unit`.
 ///
 /// Additionally sets a line-height of `4rem` on the `body` element,
 /// and a font-size in each breakpoint defined in `$jigsass-get-body-font-size`;
 /// ---
-@mixin jigsass-set-baseline() {
+/// @param {Boolean} percentage - Set the html element's font-size in % instead of px
+/// ---
+@mixin jigsass-set-baseline($percentage: true) {
   @at-root html {
     $bps: map-get(jigsass-merge-sizes(), rhythm-unit);
     @each $bp, $value in $bps {
       @include jigsass-mq($bp) {
-        font-size: jigsass-get-rhythm-unit() / $_jigsass-browser-default-font-size * 100%;
+        @if ($percentage) {
+          font-size: jigsass-get-rhythm-unit() / $_jigsass-browser-default-font-size * 100%;
+        }
+        @else {
+          font-size: jigsass-get-rhythm-unit();
+        }
       }
     }
   }
